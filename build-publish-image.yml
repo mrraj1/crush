@@ -1,0 +1,54 @@
+name: Build and publish images
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/*'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'tsoa.json'
+      - 'build/*'
+    branches: ['dev']
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  build-coupons-image:
+    name: 'Build image for coupons service'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: datasent-inc/github-actions/actions/build-publish-ecr-image@main
+        with:
+          repository: ${{ vars.ECR_REPOSITORY }}
+          dockerfile: './build/Dockerfile'
+          filters: |
+            src:
+              - 'src/*'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.json'
+              - 'tsoa.json'
+              - 'build/*'
+              - '!src/sovrn_mock.ts'
+
+  build-mock-sovrn-api-image:
+    name: 'Build image for a mock implementation for the Sovrn API'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: datasent-inc/github-actions/actions/build-publish-ecr-image@main
+        with:
+          repository: ${{ vars.ECR_REPOSITORY }}/sovrn-api-mock
+          dockerfile: './build/sovrn-api-mock.Dockerfile'
+          filters: |
+            src:
+              - 'src/logging.ts'
+              - 'src/models.ts'
+              - 'src/sovrn_mock.ts'
