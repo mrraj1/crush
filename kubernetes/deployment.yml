@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crush-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crush
+  template:
+    metadata:
+      labels:
+        app: crush
+    spec:
+      containers:
+        - name: crush-container
+          image: jnbhol101/crush:v1  # Your private image
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: regcred  # Referencing the secret you created
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crush-service
+spec:
+  selector:
+    app: crush
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
